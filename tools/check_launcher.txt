@@ -1,0 +1,6 @@
+pm disable com.google.android.setupwizard
+sleep 5
+ps -A | grep zygote > /sdcard/result.txt
+ps -A | grep system_server >> /sdcard/result.txt
+ps -A | grep launcher3 >> /sdcard/result.txt
+return 0
