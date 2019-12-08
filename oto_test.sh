@@ -11,6 +11,7 @@ OUT_BUILD=$OUT_DIR/build.log
 OUT_INSTALL=$OUT_DIR/install.log
 OUT_LAUNCHER=$OUT_DIR/launcher.log
 MAIL_CMD=s-nail
+MAIL_RCV=shizhenxing@openthos.org,qijianwei@openthos.org
 
 which s-nail
 if [ $? -eq 1 ]; then
@@ -28,7 +29,7 @@ fi
 # 输出：如返回2，则仓库无更新；否则，会在out目录下放user、userdebug和eng三个版本的镜像。
 $BASE_DIR/bin/build.sh $1 $2 $OUT_DIR > $OUT_BUILD 2>&1
 if [ $? -eq 2 ]; then
-  echo `date +%Y%m%d`"仓库无更新" | $MAIL_CMD -s "AutoTest Result" shizhenxing@openthos.org
+  echo `date +%Y%m%d`"仓库无更新" | $MAIL_CMD -s "AutoTest Result" $MAIL_RCV
   exit
 fi
 
@@ -42,4 +43,4 @@ $BASE_DIR/bin/install.sh $OUT_DIR > $OUT_INSTALL 2>&1
 # 输出：在out目录下存放包含桌面进程信息的文件。
 $BASE_DIR/bin/launcher.sh $OUT_DIR > $OUT_LAUNCHER 2>&1 
 
-$MAIL_CMD -s "AutoTest Result" shizhenxing@openthos.org < $OUT_DIR/result.txt
+$MAIL_CMD -s "AutoTest Result" $MAIL_RCV < $OUT_DIR/result.txt
