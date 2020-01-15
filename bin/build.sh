@@ -3,7 +3,6 @@
 # $2 : the script need running in docker
 # $3 : the out dir
 
-# source /etc/profile > /dev/null 2>&1
 DATE=`date +%Y%m%d%H`
 IS_NEW=F
 export USER=root	# for crontab
@@ -19,7 +18,7 @@ elif [ ! -d $1 ]; then
 fi
 
 pushd $1
-  repo sync > /dev/null
+  repo sync > $3/repo_sync.txt
   wait
   repo manifest -r -o ../prop/$DATE.xml
   CMP_XML=`ls -t ../prop | awk 'NR==2'`

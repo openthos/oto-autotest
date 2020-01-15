@@ -2,9 +2,10 @@
 # $1 : out dir
 
 BASE_DIR=$(dirname $1)
+NBD=nbd0
 
 if [ ! -e /dev/nbd0 ]; then
-  modprobe nbd
+  /sbin/modprobe nbd
 fi
 
 # launcher_test : print the pid of launcher to a file
@@ -18,27 +19,32 @@ function launcher_test() {
   else
     echo "* $2.qcow2已生成" >> $1/result.txt
   fi
-  qemu-nbd -c /dev/nbd0 $1/$2.qcow2
+
+  for i in {0,1,2,3}
+  do
+    qemu-nbd -c /dev/nbd$i $1/$2.qcow2
+    if [ ! -e /dev/${NBD}p2 ]; then
+      qemu-nbd -d /dev/$NBD
+      continue
+    else
+      NBD=nbd$i
+    fi
+    break
+  done
   sleep 1
 
-  if [ ! -e /dev/nbd0p2 ]; then
-    echo "/dev/nbd0p2 does not exist"
-    qemu-nbd -d /dev/nbd0
-    return 2
-  fi
-
-  mount /dev/nbd0p2 $1/mnt_point
+  mount /dev/${NBD}p2 $1/mnt_point
   sed -i '$d' $1/mnt_point/etc/init.sh
   cat $BASE_DIR/tools/check_launcher.txt >> $1/mnt_point/etc/init.sh
   sync
   umount -l $1/mnt_point
 
-  timeout 300 qemu-system-x86_64 -bios $BASE_DIR/tools/OVMF.fd -m 4G -enable-kvm -hda /dev/nbd0 -vnc :3
+  timeout 300 qemu-system-x86_64 -bios $BASE_DIR/tools/OVMF.fd -m 4G -enable-kvm -hda /dev/$NBD -vnc :3
 
-  mount /dev/nbd0p3 $1/mnt_point
+  mount /dev/${NBD}p3 $1/mnt_point
   cp $1/mnt_point/media/0/result.txt $1/result_launcher.$2
   umount $1/mnt_point
-  qemu-nbd -d /dev/nbd0
+  qemu-nbd -d /dev/$NBD
 }
 
 # generate_result : generate result.txt which is human friendly
