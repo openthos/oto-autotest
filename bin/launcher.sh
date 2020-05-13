@@ -22,12 +22,12 @@ function launcher_test() {
 
   for i in {0,1,2,3}
   do
-    qemu-nbd -c /dev/nbd$i $1/$2.qcow2
+    NBD=nbd$i
+    qemu-nbd -c /dev/$NBD $1/$2.qcow2
+    sleep 2
     if [ ! -e /dev/${NBD}p2 ]; then
       qemu-nbd -d /dev/$NBD
       continue
-    else
-      NBD=nbd$i
     fi
     break
   done
